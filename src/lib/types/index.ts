@@ -83,6 +83,11 @@ export type VariantGenerateRequest = {
   focus_element: "all" | "headline" | "cta" | "body";
 };
 
+export type VariantGenerateResponse = {
+  variants?: Variant[];
+  agent_summary?: string;
+};
+
 export type ExperimentStatus = "running" | "completed" | "paused" | "insufficient_data";
 
 export type Experiment = {
@@ -115,6 +120,12 @@ export type ExperimentCreate = {
 export type ExperimentSimulateRequest = {
   experiment_id: string;
   num_events: number;
+};
+
+export type ExperimentAnalyzeResponse = {
+  statistical_significance?: number;
+  winner_id?: string | null;
+  details?: string;
 };
 
 export type AnalyticsReport = {

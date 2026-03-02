@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { motion } from "framer-motion";
 import { listExperiments, createExperiment, simulateExperiment, analyzeExperiment } from "@/lib/api/experiments";
 import { listVariants } from "@/lib/api/variants";
 import type { Experiment, Variant } from "@/lib/types";
@@ -115,13 +116,19 @@ export default function ExperimentsPage() {
         <ErrorState title="Experiments unavailable" description={error} onRetry={load} />
       ) : experiments.length ? (
         <div className="space-y-4">
-          {experiments.map((experiment) => (
-            <ExperimentCard
+          {experiments.map((experiment, index) => (
+            <motion.div
               key={experiment.id}
-              experiment={experiment}
-              onAnalyze={handleAnalyze}
-              onSimulate={handleSimulate}
-            />
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.26, delay: index * 0.05 }}
+            >
+              <ExperimentCard
+                experiment={experiment}
+                onAnalyze={handleAnalyze}
+                onSimulate={handleSimulate}
+              />
+            </motion.div>
           ))}
         </div>
       ) : (

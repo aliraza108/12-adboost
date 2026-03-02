@@ -35,8 +35,22 @@ export function CTRChart({
             formatter={(value: number) => formatPercent(value)}
           />
           <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: "#5c3a1e" }} />
-          <Bar dataKey="predicted" name="Predicted CTR" fill="#d4b896" radius={[6, 6, 0, 0]} />
-          <Bar dataKey="actual" name="Actual CTR" fill="#c8602a" radius={[6, 6, 0, 0]} />
+          <Bar
+            dataKey="predicted"
+            name="Predicted CTR"
+            fill="#d4b896"
+            radius={[6, 6, 0, 0]}
+            animationBegin={120}
+            animationDuration={700}
+          />
+          <Bar
+            dataKey="actual"
+            name="Actual CTR"
+            fill="#c8602a"
+            radius={[6, 6, 0, 0]}
+            animationBegin={180}
+            animationDuration={780}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

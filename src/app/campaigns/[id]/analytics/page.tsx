@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { Copy } from "lucide-react";
 import { getCampaignReport, getCampaignTrends } from "@/lib/api/analytics";
 import { CTRChart } from "@/components/analytics/CTRChart";
 import { WinnerBanner } from "@/components/analytics/WinnerBanner";
@@ -10,6 +11,7 @@ import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AgentThinking } from "@/components/ui/AgentThinking";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { Button } from "@/components/ui/Button";
 import { toast } from "sonner";
 import type { AnalyticsReport, AnalyticsTrends, Variant } from "@/lib/types";
 
@@ -43,6 +45,9 @@ const renderMarkdown = (markdown: string) => {
         </li>
       );
     }
+    if (!line.trim()) {
+      return <div key={index} className="h-2" />;
+    }
     return (
       <p key={index} className="mt-2 text-sm text-sand-700">
         {line}
@@ -73,7 +78,7 @@ export default function AnalyticsPage() {
           setReport(reportData);
           setTrends(trendsData);
         }
-      } catch (error) {
+      } catch {
         toast.error("Unable to load analytics.");
         if (mounted) setError("Analytics data couldn't be fetched.");
       } finally {
@@ -101,12 +106,18 @@ export default function AnalyticsPage() {
 
   const chartData =
     trends?.all_variants_ranked?.map((variant: Variant) => ({
-      name: `${variant.creative.headline.slice(0, 12)}...`,
+      name: `${variant.creative.headline.slice(0, 16)}...`,
       predicted: variant.predictions?.predicted_ctr ?? 0,
       actual: variant.ctr ?? 0
     })) ?? [];
 
   const winner = report?.winners?.[0];
+
+  const recommendations =
+    (trends?.all_variants_ranked ?? []).slice(0, 4).map((variant: Variant) => {
+      const tone = variant.creative.tone?.replace(/_/g, " ") ?? "top-performing";
+      return `Prioritize ${tone} messaging: "${variant.creative.headline}"`;
+    }) ?? [];
 
   return (
     <div className="space-y-6">
@@ -137,7 +148,7 @@ export default function AnalyticsPage() {
           <PatternsList
             patterns={Object.entries(trends?.tone_performance_avg ?? {}).map(([tone, value]) => ({
               title: tone.replace(/_/g, " "),
-              description: `Average CTR ${((value as number) * 100).toFixed(2)}% for this tone.`
+              description: `Average CTR ${(Number(value) * 100).toFixed(2)}% for this tone.`
             }))}
           />
         </div>
@@ -145,22 +156,35 @@ export default function AnalyticsPage() {
 
       <Card className="p-6">
         <h2 className="section-underline font-display text-2xl">AI Report</h2>
-        <div className="mt-4 space-y-2">{report?.ai_report ? renderMarkdown(report.ai_report) : "No report."}</div>
+        <details className="mt-4 rounded-lg border border-sand-200 bg-warm-white p-4 open:shadow-soft">
+          <summary className="cursor-pointer text-sm font-medium text-sand-700">View full agent report</summary>
+          <div className="mt-3 space-y-1">{report?.ai_report ? renderMarkdown(report.ai_report) : "No report."}</div>
+        </details>
       </Card>
 
       <Card className="p-6">
         <h2 className="section-underline font-display text-2xl">Recommendations</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {(trends?.all_variants_ranked ?? []).slice(0, 4).map((variant: Variant, index: number) => (
-            <Card key={variant.id} className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-terracotta text-white">
-                  {index + 1}
+          {recommendations.map((recommendation, index) => (
+            <Card key={`${recommendation}-${index}`} className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-terracotta text-warm-white">
+                    <span className="font-display text-xl">{index + 1}</span>
+                  </div>
+                  <p className="text-sm text-sand-700">{recommendation}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-sand-700">Double down on {variant.creative.tone ?? "top"} messaging.</p>
-                  <p className="text-xs text-sand-500">Winner CTR {((variant.ctr ?? 0) * 100).toFixed(2)}%</p>
-                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    navigator.clipboard.writeText(recommendation);
+                    toast.success("Recommendation copied.");
+                  }}
+                  className="h-8 w-8 p-0"
+                >
+                  <Copy size={14} />
+                </Button>
               </div>
             </Card>
           ))}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { motion } from "framer-motion";
 import { listVariants, generateVariants } from "@/lib/api/variants";
 import type { Variant } from "@/lib/types";
 import { VariantCard } from "@/components/variants/VariantCard";
@@ -79,8 +80,15 @@ export default function VariantsPage() {
         <ErrorState title="Variants unavailable" description={error} onRetry={load} />
       ) : variants.length ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {variants.map((variant) => (
-            <VariantCard key={variant.id} variant={variant} />
+          {variants.map((variant, index) => (
+            <motion.div
+              key={variant.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.26, delay: index * 0.05 }}
+            >
+              <VariantCard variant={variant} />
+            </motion.div>
           ))}
         </div>
       ) : (

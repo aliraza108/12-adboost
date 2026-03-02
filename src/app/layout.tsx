@@ -40,7 +40,7 @@ export default function RootLayout({
             <Sidebar />
             <div className="flex min-h-screen flex-1 flex-col">
               <TopBar />
-              <main className="flex-1 px-6 py-8 md:px-10">
+              <main className="flex-1 px-6 py-8 pb-28 md:px-10 md:pb-8">
                 <div className="mx-auto w-full max-w-[1200px]">
                   <RouteTransition>{children}</RouteTransition>
                 </div>

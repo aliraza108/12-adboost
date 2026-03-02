@@ -22,7 +22,7 @@ const statusStyles: Record<string, string> = {
   draft: "bg-sand-100 text-sand-600",
   loser: "bg-sand-200 text-sand-700",
   completed: "bg-sage-light text-sage",
-  running: "bg-terracotta-light text-terracotta"
+  running: "bg-sage-light text-sage"
 };
 
 export function Badge({ className, goal, status, ...props }: BadgeProps) {

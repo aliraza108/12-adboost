@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { listExperiments, createExperiment, simulateExperiment, analyzeExperiment } from "@/lib/api/experiments";
 import { listVariants } from "@/lib/api/variants";
+import { getApiErrorDetail, getCampaignNotFoundMessage, isNotFoundError } from "@/lib/api/errors";
 import type { Experiment, Variant } from "@/lib/types";
 import { ExperimentCard } from "@/components/experiments/ExperimentCard";
 import { CreateExperimentForm } from "@/components/experiments/CreateExperimentForm";
@@ -35,9 +36,13 @@ export default function ExperimentsPage() {
       ]);
       setExperiments(experimentResponse.experiments);
       setVariants(variantResponse.variants);
-    } catch (error) {
-      toast.error("Failed to load experiments.");
-      setError("Experiments couldn't be loaded.");
+    } catch (error: unknown) {
+      const detail = getApiErrorDetail(error);
+      const message = isNotFoundError(error, "campaign")
+        ? getCampaignNotFoundMessage(campaignId)
+        : (detail ?? "Experiments couldn't be loaded.");
+      toast.error(message);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -113,7 +118,13 @@ export default function ExperimentsPage() {
           ))}
         </div>
       ) : error ? (
-        <ErrorState title="Experiments unavailable" description={error} onRetry={load} />
+        <ErrorState
+          title="Experiments unavailable"
+          description={error}
+          onRetry={load}
+          actionLabel="Back to Campaigns"
+          onAction={() => (window.location.href = "/campaigns")}
+        />
       ) : experiments.length ? (
         <div className="space-y-4">
           {experiments.map((experiment, index) => (

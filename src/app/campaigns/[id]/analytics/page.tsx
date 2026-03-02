@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Copy } from "lucide-react";
 import { getCampaignReport, getCampaignTrends } from "@/lib/api/analytics";
+import { getApiErrorDetail, getCampaignNotFoundMessage, isNotFoundError } from "@/lib/api/errors";
 import { CTRChart } from "@/components/analytics/CTRChart";
 import { WinnerBanner } from "@/components/analytics/WinnerBanner";
 import { PatternsList } from "@/components/analytics/PatternsList";
@@ -78,9 +79,13 @@ export default function AnalyticsPage() {
           setReport(reportData);
           setTrends(trendsData);
         }
-      } catch {
-        toast.error("Unable to load analytics.");
-        if (mounted) setError("Analytics data couldn't be fetched.");
+      } catch (error: unknown) {
+        const detail = getApiErrorDetail(error);
+        const message = isNotFoundError(error, "campaign")
+          ? getCampaignNotFoundMessage(campaignId)
+          : (detail ?? "Analytics data couldn't be fetched.");
+        toast.error(message);
+        if (mounted) setError(message);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -101,7 +106,15 @@ export default function AnalyticsPage() {
   }
 
   if (error) {
-    return <ErrorState title="Analytics unavailable" description={error} onRetry={() => window.location.reload()} />;
+    return (
+      <ErrorState
+        title="Analytics unavailable"
+        description={error}
+        onRetry={() => window.location.reload()}
+        actionLabel="Back to Campaigns"
+        onAction={() => (window.location.href = "/campaigns")}
+      />
+    );
   }
 
   const chartData =

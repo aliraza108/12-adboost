@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import axios from "axios";
 import { getCampaignOverview } from "@/lib/api/campaigns";
 import { getOptimizationStatus } from "@/lib/api/optimize";
+import { getApiErrorDetail, getCampaignNotFoundMessage, isNotFoundError } from "@/lib/api/errors";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -38,11 +38,13 @@ export default function CampaignOverviewPage() {
           if (mounted) setStatus(null);
         }
       } catch (error: unknown) {
-        const detail = axios.isAxiosError(error)
-          ? (error.response?.data as { detail?: string } | undefined)?.detail
-          : undefined;
-        toast.error(detail ?? "Unable to load campaign overview.");
-        if (mounted) setError(detail ?? "Campaign overview could not be loaded.");
+        const detail = getApiErrorDetail(error);
+        const notFound = isNotFoundError(error, "campaign");
+        const message = notFound
+          ? getCampaignNotFoundMessage(campaignId)
+          : (detail ?? "Campaign overview could not be loaded.");
+        toast.error(message);
+        if (mounted) setError(message);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -58,7 +60,15 @@ export default function CampaignOverviewPage() {
   }
 
   if (error) {
-    return <ErrorState title="Campaign unavailable" description={error} onRetry={() => window.location.reload()} />;
+    return (
+      <ErrorState
+        title="Campaign unavailable"
+        description={error}
+        onRetry={() => window.location.reload()}
+        actionLabel="Back to Campaigns"
+        onAction={() => (window.location.href = "/campaigns")}
+      />
+    );
   }
 
   if (!overview) {

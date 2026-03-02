@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { listVariants, generateVariants } from "@/lib/api/variants";
+import { getApiErrorDetail, getCampaignNotFoundMessage, isNotFoundError } from "@/lib/api/errors";
 import type { Variant } from "@/lib/types";
 import { VariantCard } from "@/components/variants/VariantCard";
 import { GenerateVariantsForm } from "@/components/variants/GenerateVariantsForm";
@@ -30,9 +31,13 @@ export default function VariantsPage() {
       setError(null);
       const response = await listVariants(campaignId);
       setVariants(response.variants);
-    } catch (error) {
-      toast.error("Failed to load variants.");
-      setError("Variants couldn't be loaded.");
+    } catch (error: unknown) {
+      const detail = getApiErrorDetail(error);
+      const message = isNotFoundError(error, "campaign")
+        ? getCampaignNotFoundMessage(campaignId)
+        : (detail ?? "Variants couldn't be loaded.");
+      toast.error(message);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -85,7 +90,13 @@ export default function VariantsPage() {
           ))}
         </div>
       ) : error ? (
-        <ErrorState title="Variants unavailable" description={error} onRetry={load} />
+        <ErrorState
+          title="Variants unavailable"
+          description={error}
+          onRetry={load}
+          actionLabel="Back to Campaigns"
+          onAction={() => (window.location.href = "/campaigns")}
+        />
       ) : variants.length ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {variants.map((variant, index) => (

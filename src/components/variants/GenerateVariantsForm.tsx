@@ -81,10 +81,14 @@ export function GenerateVariantsForm({
         variant="primary"
         className="w-full"
         loading={loading}
+        disabled={loading || selectedTones.length === 0}
         onClick={() => onSubmit({ num_variants: numVariants, tones: selectedTones, focus_element: focus })}
       >
         Generate with AI
       </Button>
+      {selectedTones.length === 0 && (
+        <p className="text-xs text-terracotta">Select at least one tone.</p>
+      )}
     </Card>
   );
 }

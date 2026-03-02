@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
+import axios from "axios";
 import { listVariants, generateVariants } from "@/lib/api/variants";
 import type { Variant } from "@/lib/types";
 import { VariantCard } from "@/components/variants/VariantCard";
@@ -47,12 +48,19 @@ export default function VariantsPage() {
     focus_element: "all" | "headline" | "cta" | "body";
   }) => {
     try {
+      if (!campaignId) {
+        toast.error("Campaign ID is missing. Reload this page and try again.");
+        return;
+      }
       setGenerating(true);
       await generateVariants({ campaign_id: campaignId, ...payload });
       toast.success("Variants generated.");
       await load();
-    } catch (error) {
-      toast.error("Variant generation failed.");
+    } catch (error: unknown) {
+      const detail = axios.isAxiosError(error)
+        ? (error.response?.data as { detail?: string } | undefined)?.detail
+        : undefined;
+      toast.error(detail ?? "Variant generation failed.");
     } finally {
       setGenerating(false);
     }

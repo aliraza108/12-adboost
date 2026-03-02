@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import axios from "axios";
 import { getCampaignOverview } from "@/lib/api/campaigns";
 import { getOptimizationStatus } from "@/lib/api/optimize";
 import { Card } from "@/components/ui/Card";
@@ -27,17 +28,21 @@ export default function CampaignOverviewPage() {
       try {
         setLoading(true);
         setError(null);
-        const [overviewData, statusData] = await Promise.all([
-          getCampaignOverview(campaignId),
-          getOptimizationStatus(campaignId)
-        ]);
-        if (mounted) {
-          setOverview(overviewData);
-          setStatus(statusData);
+        const overviewData = await getCampaignOverview(campaignId);
+        if (mounted) setOverview(overviewData);
+
+        try {
+          const statusData = await getOptimizationStatus(campaignId);
+          if (mounted) setStatus(statusData);
+        } catch {
+          if (mounted) setStatus(null);
         }
-      } catch (error) {
-        toast.error("Unable to load campaign overview.");
-        if (mounted) setError("Campaign overview could not be loaded.");
+      } catch (error: unknown) {
+        const detail = axios.isAxiosError(error)
+          ? (error.response?.data as { detail?: string } | undefined)?.detail
+          : undefined;
+        toast.error(detail ?? "Unable to load campaign overview.");
+        if (mounted) setError(detail ?? "Campaign overview could not be loaded.");
       } finally {
         if (mounted) setLoading(false);
       }

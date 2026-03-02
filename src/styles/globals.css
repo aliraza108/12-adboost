@@ -1,0 +1,113 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sand-50: #fdf8f0;
+  --sand-100: #f5ead8;
+  --sand-200: #e8d5b0;
+  --sand-300: #d4b896;
+  --sand-400: #bc9470;
+  --sand-500: #a07040;
+  --sand-600: #7a5230;
+  --sand-700: #5c3a1e;
+  --sand-800: #3d2410;
+  --sand-900: #1e1008;
+  --terracotta: #c8602a;
+  --terracotta-light: #f0ddd0;
+  --sage: #4a7c6f;
+  --sage-light: #d4e8e4;
+  --warm-white: #fffcf7;
+
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --card-border: 1px solid rgba(160, 112, 64, 0.18);
+  --card-shadow: 0 2px 16px rgba(92, 58, 30, 0.08);
+  --card-radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--sand-50);
+  color: var(--sand-800);
+  font-family: var(--font-body);
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: 0.2px;
+}
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0.035;
+  background-image: url('/noise.svg');
+  background-repeat: repeat;
+}
+
+.sand-card {
+  background: var(--warm-white);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.section-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.section-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 70%;
+  height: 2px;
+  background: var(--terracotta);
+  opacity: 0.8;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, rgba(232, 213, 176, 0.35), rgba(245, 234, 216, 0.7), rgba(232, 213, 176, 0.35));
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes floatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.route-fade {
+  animation: floatIn 0.5s ease;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
